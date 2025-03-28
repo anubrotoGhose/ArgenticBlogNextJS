@@ -1,10 +1,11 @@
 "use client"; // Needed for useSearchParams
 
 import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
 import DOMPurify from "dompurify";
+
 // Define a TypeScript interface for the post object
 interface Post {
   articleid: string;
@@ -20,10 +21,15 @@ const supabase = createClient(
 );
 
 function PostDetailContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const postId = searchParams.get("post_id"); // Get post_id from query params
+  const postId = searchParams.get("post_id");
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleAuthorNavigation = (username: string) => {
+    router.push(`/author?username=${username}`); // Corrected parameter
+  };
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -35,8 +41,8 @@ function PostDetailContent() {
         .eq("articleid", postId)
         .single();
 
-      if (!error) {
-        setPost(post);
+      if (!error && post) {
+        setPost({ ...post, content: post.content || "" }); // Ensure content is never null
       }
       setLoading(false);
     };
@@ -51,10 +57,30 @@ function PostDetailContent() {
   return (
     <div className="bg-gray-900 text-white min-h-screen flex flex-col">
       <div className="max-w-3xl mx-auto p-6">
+        {/* Back Button */}
+        <button
+          onClick={() => router.back()}
+          className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+        >
+          ←
+        </button>
+
         <h1 className="text-3xl font-bold text-blue-500">{post.title}</h1>
         <p className="text-gray-500">Posted on {new Date(post.PostTimeStamp).toLocaleDateString()}</p>
-        <p className="text-gray-500">By {post.username}</p>
-        <div className="mt-4 text-gray-300" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
+        <p className="text-gray-500">
+          By{" "}
+          <button
+            onClick={() => handleAuthorNavigation(post.username)}
+            className="text-blue-400 hover:underline hover:text-blue-500 bg-transparent border-none cursor-pointer"
+          >
+            {post.username}
+          </button>
+        </p>
+
+        <div
+          className="mt-4 text-gray-300"
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
+        />
       </div>
     </div>
   );
