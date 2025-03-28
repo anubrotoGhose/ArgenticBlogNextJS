@@ -11,11 +11,14 @@ export default async function HomePage() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-4xl font-bold text-center text-blue-500">Latest Blog Posts</h1>
-        <div>
-        <BlogList posts={posts || []} />
-        </div>
+    <div className="bg-gray-900 text-white min-h-screen flex flex-col">
+      <div className="p-6">
+        <h1 className="text-4xl font-bold text-center text-blue-500">ArgenticBlog</h1>
+        <h1 className="text-4xl font-bold text-center text-blue-500">Latest Blog Posts</h1>
+          <div>
+          <BlogList posts={posts || []} />
+          </div>
+      </div>
     </div>
   );
 }

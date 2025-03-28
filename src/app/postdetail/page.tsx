@@ -4,11 +4,12 @@ import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
-
+import DOMPurify from "dompurify";
 // Define a TypeScript interface for the post object
 interface Post {
   articleid: string;
   title: string;
+  username: string;
   PostTimeStamp: string;
   content: string;
 }
@@ -48,10 +49,13 @@ function PostDetailContent() {
   if (!post) return <p className="text-red-500">Post not found</p>;
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-3xl font-bold text-blue-500">{post.title}</h1>
-      <p className="text-gray-500">Posted on {new Date(post.PostTimeStamp).toLocaleDateString()}</p>
-      <div className="mt-4 text-gray-300">{post.content}</div>
+    <div className="bg-gray-900 text-white min-h-screen flex flex-col">
+      <div className="max-w-3xl mx-auto p-6">
+        <h1 className="text-3xl font-bold text-blue-500">{post.title}</h1>
+        <p className="text-gray-500">Posted on {new Date(post.PostTimeStamp).toLocaleDateString()}</p>
+        <p className="text-gray-500">By {post.username}</p>
+        <div className="mt-4 text-gray-300" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }} />
+      </div>
     </div>
   );
 }
