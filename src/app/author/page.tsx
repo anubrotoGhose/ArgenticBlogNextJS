@@ -1,10 +1,10 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import {Suspense, useState, useEffect, useCallback } from "react";
 import { createClient } from "@supabase/supabase-js";
-import { Suspense } from "react";
 import { useRouter } from "next/navigation";
+import { App } from "@capacitor/app";
 
 interface Post {
     articleid: string;
@@ -32,6 +32,34 @@ function AuthorPageContent() {
     const username = searchParams.get("username");
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const handleBack = useCallback(() => {
+        if (window.history.length > 1) {
+          router.back();
+        } else {
+          router.push("/");
+        }
+      }, [router]); // ✅ Dependencies: Only `router`
+    
+      useEffect(() => {
+        const handleAndroidBack = () => {
+          handleBack();
+        };
+    
+        const setupListener = async () => {
+          const listener = await App.addListener("backButton", handleAndroidBack);
+          
+          return () => {
+            listener.remove();
+          };
+        };
+    
+        const cleanup = setupListener();
+    
+        return () => {
+          cleanup.then((removeListener) => removeListener?.()).catch(console.error);
+        };
+      }, [handleBack]);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -61,13 +89,18 @@ function AuthorPageContent() {
 
     return (
         <div className="bg-gray-900 text-white min-h-screen p-6">
-            {/* Back Button */}
-            <button
-                onClick={() => router.back()}
-                className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-            >
-                ←
-            </button>
+            <header className="bg-gray-900 text-white p-4 shadow-md">
+                <div className="container mx-auto">
+                    {/* Back Button - Extreme Top Left */}
+                    <button
+                        onClick={handleBack}
+                        className="absolute top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    >
+                        ←
+                    </button>
+                </div>
+            </header>
+
             <h1 className="text-3xl font-bold text-blue-500">Posts by {username}</h1>
 
             <div className="mt-4 space-y-4">

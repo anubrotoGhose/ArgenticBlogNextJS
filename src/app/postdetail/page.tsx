@@ -1,9 +1,9 @@
-"use client"; // Needed for useSearchParams
+"use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { App } from "@capacitor/app";
 import DOMPurify from "dompurify";
 
 // Define a TypeScript interface for the post object
@@ -28,8 +28,37 @@ function PostDetailContent() {
   const [loading, setLoading] = useState(true);
 
   const handleAuthorNavigation = (username: string) => {
-    router.push(`/author?username=${username}`); // Corrected parameter
+    router.push(`/author?username=${username}`);
   };
+
+  // ✅ Fix: Wrap `handleBack` in useCallback
+  const handleBack = useCallback(() => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  }, [router]); // ✅ Dependencies: Only `router`
+
+  useEffect(() => {
+    const handleAndroidBack = () => {
+      handleBack();
+    };
+
+    const setupListener = async () => {
+      const listener = await App.addListener("backButton", handleAndroidBack);
+      
+      return () => {
+        listener.remove();
+      };
+    };
+
+    const cleanup = setupListener();
+
+    return () => {
+      cleanup.then((removeListener) => removeListener?.()).catch(console.error);
+    };
+  }, [handleBack]); // ✅ Now `handleBack` is stable
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -42,7 +71,7 @@ function PostDetailContent() {
         .single();
 
       if (!error && post) {
-        setPost({ ...post, content: post.content || "" }); // Ensure content is never null
+        setPost({ ...post, content: post.content || "" });
       }
       setLoading(false);
     };
@@ -56,15 +85,18 @@ function PostDetailContent() {
 
   return (
     <div className="bg-gray-900 text-white min-h-screen flex flex-col">
-      <div className="max-w-3xl mx-auto p-6">
-        {/* Back Button */}
-        <button
-          onClick={() => router.back()}
-          className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-        >
-          ←
-        </button>
+      <header className="bg-gray-900 text-white p-4 shadow-md relative">
+        <div className="container mx-auto">
+          <button
+            onClick={handleBack}
+            className="absolute top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+          >
+            ←
+          </button>
+        </div>
+      </header>
 
+      <div className="max-w-3xl mx-auto p-6">
         <h1 className="text-3xl font-bold text-blue-500">{post.title}</h1>
         <p className="text-gray-500">Posted on {new Date(post.PostTimeStamp).toLocaleDateString()}</p>
         <p className="text-gray-500">
