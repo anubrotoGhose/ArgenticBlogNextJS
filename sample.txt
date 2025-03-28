@@ -1,0 +1,33 @@
+// post/post_id
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+export default async function PostDetail({ params }: { params: { post_id: string } }) {
+  const post_id = params.post_id;
+
+  if (!post_id) {
+    return <p className="text-red-500">Invalid post ID</p>;
+  }
+
+  const { data: post, error } = await supabase
+    .from("articles")
+    .select("*")
+    .eq("articleid", post_id)
+    .single();
+
+  if (error || !post) {
+    return <p className="text-red-500">Post not found</p>;
+  }
+
+  return (
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-3xl font-bold text-blue-500">{post.title}</h1>
+      <p className="text-gray-500">Posted on {post.PostTimeStamp}</p>
+      <div className="mt-4 text-gray-300">{post.content}</div>
+    </div>
+  );
+}
