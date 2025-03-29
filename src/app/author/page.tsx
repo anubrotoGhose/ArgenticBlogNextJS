@@ -1,10 +1,10 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import {Suspense, useState, useEffect, useCallback } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { Suspense, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { App } from "@capacitor/app";
+import { supabase } from "@/lib/supabase";
 
 interface Post {
     articleid: string;
@@ -13,11 +13,6 @@ interface Post {
     PostTimeStamp: string;
     content: string;
 }
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 // Function to remove all HTML tags and return plain text
 const stripHtmlTags = (html: string) => {
@@ -35,31 +30,31 @@ function AuthorPageContent() {
 
     const handleBack = useCallback(() => {
         if (window.history.length > 1) {
-          router.back();
+            router.back();
         } else {
-          router.push("/");
+            router.push("/");
         }
-      }, [router]); // ✅ Dependencies: Only `router`
-    
-      useEffect(() => {
+    }, [router]); // ✅ Dependencies: Only `router`
+
+    useEffect(() => {
         const handleAndroidBack = () => {
-          handleBack();
+            handleBack();
         };
-    
+
         const setupListener = async () => {
-          const listener = await App.addListener("backButton", handleAndroidBack);
-          
-          return () => {
-            listener.remove();
-          };
+            const listener = await App.addListener("backButton", handleAndroidBack);
+
+            return () => {
+                listener.remove();
+            };
         };
-    
+
         const cleanup = setupListener();
-    
+
         return () => {
-          cleanup.then((removeListener) => removeListener?.()).catch(console.error);
+            cleanup.then((removeListener) => removeListener?.()).catch(console.error);
         };
-      }, [handleBack]);
+    }, [handleBack]);
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -83,6 +78,15 @@ function AuthorPageContent() {
         router.push(`/postdetail?post_id=${articleid}`);
     };
 
+    // const handleHomeNavigation = () => {
+    //     router.push(`/`);
+    // };
+
+    // const handleHomeNavigation = () => {
+    //     window.location.href = "/";
+    // };
+
+
     if (!username) return <p className="text-red-500">Invalid username</p>;
     if (loading) return <p className="text-blue-500">Loading...</p>;
     if (posts.length === 0) return <p className="text-red-500">No posts found</p>;
@@ -93,8 +97,8 @@ function AuthorPageContent() {
                 <div className="container mx-auto">
                     {/* Back Button - Extreme Top Left */}
                     <button
-                        onClick={handleBack}
-                        className="absolute top-4 left-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                        onClick={handleBack} // ✅ Explicit call
+                        className="relative px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                     >
                         ←
                     </button>
@@ -102,7 +106,12 @@ function AuthorPageContent() {
             </header>
 
             <h1 className="text-3xl font-bold text-blue-500">Posts by {username}</h1>
-
+            {/* <button
+                onClick={() => handleHomeNavigation()} // ✅ Explicit call
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+            >
+                Home
+            </button> */}
             <div className="mt-4 space-y-4">
                 {posts.map(post => {
                     const cleanText = stripHtmlTags(post.content || "").slice(0, 200); // Strip tags and take first 200 chars
