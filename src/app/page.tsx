@@ -1,11 +1,12 @@
 "use client";
 
-import BlogList from "./components/BlogList";
+import BlogList from "@/app/components/BlogList";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { FiMenu } from "react-icons/fi";
 import { useEffect, useState } from "react";
 import Sidebar from "@/app/components/SideBar";
+import SearchBar from "@/app/components/SearchBar";
 import { Post } from "@/app/models/Post";
 
 export default function HomePage() {
@@ -58,7 +59,7 @@ export default function HomePage() {
         <div className="container mx-auto flex justify-between items-center">
 
           <div className="container mx-auto">
-            <h1 className="text-xl font-semibold text-center">Argentic Blog</h1>
+            <h1 className="text-xl font-semibold text-center">ArgenticBlog</h1>
           </div>
           {/* Sidebar Toggle Button (Hidden when sidebar is open) */}
           {!isSidebarOpen && (
@@ -71,11 +72,13 @@ export default function HomePage() {
           )}
         </div>
       </header>
-      <div className="relative">
 
+      <div className="flex justify-center mt-4">
+        <SearchBar />
       </div>
       <br></br>
       <h1 className="text-4xl font-bold text-center text-blue-500">Latest Blog Posts</h1>
+      <br></br>
       <div>
         <BlogList posts={posts || []} />
       </div>
