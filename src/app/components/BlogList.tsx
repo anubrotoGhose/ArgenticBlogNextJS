@@ -1,13 +1,6 @@
 "use client";
 import { useRouter } from "next/navigation";
-
-interface Post {
-  articleid: string;
-  title: string;
-  username: string;
-  PostTimeStamp: string;
-  content?: string;
-}
+import { Post } from "@/app/models/Post";
 
 // Function to remove all HTML tags and return plain text
 const stripHtmlTags = (html: string) => {

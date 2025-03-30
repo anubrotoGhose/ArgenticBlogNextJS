@@ -5,14 +5,11 @@ import { Suspense, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { App } from "@capacitor/app";
 import { supabase } from "@/lib/supabase";
+import { Post } from "@/app/models/Post";
+import { FiMenu } from "react-icons/fi";
+import Sidebar from "@/app/components/SideBar";
+import { User } from "@supabase/supabase-js";
 
-interface Post {
-    articleid: string;
-    title: string;
-    username: string;
-    PostTimeStamp: string;
-    content: string;
-}
 
 // Function to remove all HTML tags and return plain text
 const stripHtmlTags = (html: string) => {
@@ -27,6 +24,8 @@ function AuthorPageContent() {
     const username = searchParams.get("username");
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [user, setUser] = useState<User | null>(null);
 
     const handleBack = useCallback(() => {
         if (window.history.length > 1) {
@@ -74,6 +73,20 @@ function AuthorPageContent() {
         fetchPosts();
     }, [username]);
 
+    useEffect(() => {
+        const fetchUser = async () => {
+            const { data, error } = await supabase.auth.getUser();
+            if (!error && data?.user) {
+                setUser(data.user);
+            }
+        };
+        fetchUser();
+    }, []);
+
+    const toggleSidebar = () => {
+        setIsSidebarOpen(!isSidebarOpen);
+    };
+
     const handlePostNavigation = (articleid: string) => {
         router.push(`/postdetail?post_id=${articleid}`);
     };
@@ -92,16 +105,28 @@ function AuthorPageContent() {
     if (posts.length === 0) return <p className="text-red-500">No posts found</p>;
 
     return (
-        <div className="bg-gray-900 text-white min-h-screen p-6">
-            <header className="bg-gray-900 text-white p-4 shadow-md">
-                <div className="container mx-auto">
-                    {/* Back Button - Extreme Top Left */}
+        <div className="bg-gray-900 text-white min-h-screen p-6 relative">
+            <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} user={user} />
+            {/* Header */}
+            <header className="bg-gray-900 text-white p-4 shadow-md relative">
+                <div className="container mx-auto flex justify-between items-center">
+                    {/* Back Button */}
                     <button
-                        onClick={handleBack} // ✅ Explicit call
-                        className="relative px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                        onClick={handleBack}
+                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
                     >
                         ←
                     </button>
+
+                    {/* Sidebar Toggle Button (Hidden when sidebar is open) */}
+                    {!isSidebarOpen && (
+                        <button
+                            onClick={toggleSidebar}
+                            className="p-2 bg-gray-800 rounded-md shadow-md z-50 relative"
+                        >
+                            <FiMenu size={24} />
+                        </button>
+                    )}
                 </div>
             </header>
 

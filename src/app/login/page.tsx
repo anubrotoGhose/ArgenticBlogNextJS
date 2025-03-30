@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-
+import Link from "next/link";
 
 
 export default function LoginPage() {
@@ -81,13 +81,17 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-4 text-center">
-            <a href="/signup" className="text-blue-400 hover:underline">
+            <Link href="/signup" className="text-blue-400 hover:underline">
               Sign Up
-            </a>
+            </Link>
             <span className="text-gray-400 mx-2">|</span>
-            <a href="/change-password" className="text-blue-400 hover:underline">
+            <Link href="/change-password" className="text-blue-400 hover:underline">
               Change Password
-            </a>
+            </Link>
+            <span className="text-gray-400 mx-2">|</span>
+            <Link href="/" className="text-blue-400 hover:underline">
+              Login as Guest
+            </Link>
           </div>
         </div>
       </div>

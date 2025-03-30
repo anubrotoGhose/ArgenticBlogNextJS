@@ -3,12 +3,8 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import Image from "next/image";
-
-interface UserProfile {
-    email: string;
-    username: string;
-    profile_photo: string;
-  }
+import { useRouter } from "next/navigation";
+import { UserProfile } from "@/app/models/UserProfile";
 
 export default function ProfilePage() {
     const [user, setUser] = useState<UserProfile | null>(null);
@@ -86,13 +82,20 @@ export default function ProfilePage() {
         }
     };
 
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        await supabase.auth.signOut(); // Logs the user out
+        router.push("/"); // Redirects to home
+    };
+
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-900 text-white">
             <div className="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-lg">
                 {/* Profile Header */}
                 <div className="flex flex-col items-center mb-6">
                     <Image
-                    //For now I am testing a few things
+                        //For now I am testing a few things
                         src={"https://pgpevfnwbddeankyqrhz.supabase.co/storage/v1/object/public/profile-photos//default_profile.webp"}
                         alt="Profile Photo"
                         width={96}
@@ -137,18 +140,30 @@ export default function ProfilePage() {
 
                 {/* Profile Links */}
                 <div className="mt-6 space-y-2 text-center">
-                    <a href="/change-password" className="block text-blue-400 hover:underline">
+                    <button
+                        onClick={() => router.push("/change-password")}
+                        className="block text-blue-400 hover:underline"
+                    >
                         Change Password
-                    </a>
-                    <a href="/logout" className="block text-blue-400 hover:underline">
+                    </button>
+                    <button
+                        onClick={handleLogout}
+                        className="block text-blue-400 hover:underline"
+                    >
                         Logout
-                    </a>
-                    <a href="/postblog" className="block text-blue-400 hover:underline">
+                    </button>
+                    <button
+                        onClick={() => router.push("/postblog")}
+                        className="block text-blue-400 hover:underline"
+                    >
                         Post an Article
-                    </a>
-                    <a href={`/author/${username}`} className="block text-blue-400 hover:underline">
+                    </button>
+                    <button
+                        onClick={() => router.push('/author/${username}')}
+                        className="block text-blue-400 hover:underline"
+                    >
                         My Articles
-                    </a>
+                    </button>
                 </div>
             </div>
         </div>
