@@ -96,7 +96,7 @@ export default function ProfilePage() {
                 <div className="flex flex-col items-center mb-6">
                     <Image
                         //For now I am testing a few things
-                        src={"https://pgpevfnwbddeankyqrhz.supabase.co/storage/v1/object/public/profile-photos//default_profile.webp"}
+                        src={profilePhotoUrl}
                         alt="Profile Photo"
                         width={96}
                         height={96}
