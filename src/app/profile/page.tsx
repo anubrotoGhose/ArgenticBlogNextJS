@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { UserProfile } from "@/app/models/UserProfile";
+import { Preferences } from '@capacitor/preferences';
 import { App } from "@capacitor/app";
 
 export default function ProfilePage() {
@@ -117,9 +118,10 @@ export default function ProfilePage() {
     }, [handleBack]);
 
     const handleLogout = async () => {
-        await supabase.auth.signOut(); // Logs the user out
-        router.push("/"); // Redirects to home
-    };
+        await Preferences.remove({ key: 'user_session' });
+        await supabase.auth.signOut();
+        router.push("/login");
+      };
 
     return (
         <div className="bg-gray-900 text-white min-h-screen p-6">

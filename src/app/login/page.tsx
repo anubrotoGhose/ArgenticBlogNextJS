@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { Session } from '@supabase/supabase-js';
+import { Preferences } from '@capacitor/preferences';
 import Link from "next/link";
 
 
@@ -12,20 +14,30 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
+  const saveSession = async (session: Session) => {
+    await Preferences.set({
+      key: 'user_session',
+      value: JSON.stringify(session),
+    });
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(""); // Reset error
+    setError("");
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      // Destructure both data and error from response
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
-      // Redirect to home page after successful login
-      router.push("/");
+      if (data?.session) {
+        await saveSession(data.session);  // Now properly accessing data
+        router.push("/");
+      }
     } catch {
       setError("Invalid email or password.");
     }
